@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>Vajracchedikā — app icon</title>
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#1c1917"/>
+      <stop offset="0.55" stop-color="#100e0c"/>
+      <stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stop-color="#f9e9b4"/>
+      <stop offset="0.28" stop-color="#e0bd72"/>
+      <stop offset="0.52" stop-color="#b8892f"/>
+      <stop offset="0.74" stop-color="#e8ca86"/>
+      <stop offset="1" stop-color="#a97c28"/>
+    </linearGradient>
+    <linearGradient id="goldSoft" x1="0" y1="0" x2="0.1" y2="1">
+      <stop offset="0" stop-color="#f2d99a"/>
+      <stop offset="0.5" stop-color="#d3ac60"/>
+      <stop offset="1" stop-color="#c09a4d"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#232019"/>
+      <stop offset="0.5" stop-color="#141210"/>
+      <stop offset="1" stop-color="#0a0908"/>
+    </linearGradient>
+    <linearGradient id="gemA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6d8"/><stop offset="1" stop-color="#e6c579"/>
+    </linearGradient>
+    <linearGradient id="gemB" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#f3d894"/><stop offset="1" stop-color="#b8862c"/>
+    </linearGradient>
+    <linearGradient id="gemC" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ffefc0"/><stop offset="1" stop-color="#cf9f3e"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#ffe9a8" stop-opacity="0.85"/>
+      <stop offset="0.35" stop-color="#f2c96a" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#e0b455" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sheen" cx="0.32" cy="0.16" r="0.95">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.07"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.012"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.28"/>
+    </radialGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="7" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+    </filter>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <clipPath id="plateClip">
+      <rect x="8" y="8" width="1008" height="1008" rx="196" ry="196"/>
+    </clipPath>
+  </defs>
+
+  <!-- ground -->
+  <g clip-path="url(#plateClip)">
+    <rect x="8" y="8" width="1008" height="1008" fill="url(#plate)"/>
+    <rect x="8" y="8" width="1008" height="1008" filter="url(#grain)" opacity="0.055" style="mix-blend-mode:overlay"/>
+    <rect x="8" y="8" width="1008" height="1008" fill="url(#sheen)"/>
+  </g>
+
+  <!-- gold frame -->
+  <rect x="56" y="56" width="912" height="912" rx="150" ry="150"
+        fill="none" stroke="url(#gold)" stroke-width="9"/>
+  <rect x="56" y="56" width="912" height="912" rx="150" ry="150"
+        fill="none" stroke="#000000" stroke-opacity="0.35" stroke-width="2"
+        transform="translate(0,3)"/>
+
+  <!-- ============ upper pecha stack ============ -->
+  <g>
+    <rect x="196" y="196" width="646" height="228" rx="40" fill="#0d0c0a" stroke="#2a251c" stroke-width="1.5"/>
+    <rect x="204" y="182" width="654" height="234" rx="40" fill="#111110" stroke="#2f291f" stroke-width="1.5"/>
+    <rect x="212" y="168" width="662" height="240" rx="40" fill="#131110" stroke="#332c21" stroke-width="1.5"/>
+    <rect x="222" y="150" width="668" height="272" rx="42" fill="url(#card)" stroke="#3a3226" stroke-width="2"/>
+    <line x1="300" y1="178" x2="300" y2="394" stroke="url(#goldSoft)" stroke-width="3.5" stroke-linecap="round"/>
+    <text x="272" y="286" fill="url(#goldSoft)" font-family="Jomolhari" font-size="25"
+          text-anchor="middle" transform="rotate(-90 272 286)">རྡོ་རྗེ་གཅོད་པ།</text>
+    <g fill="url(#gold)" font-family="Jomolhari" font-size="38" text-anchor="middle">
+      <text x="596" y="212">རྒྱ་གར་སྐད་དུ། ཨཱརྻ་བཛྲ་ཙྪེ་ད་ཀ་པྲཛྙཱ་</text>
+      <text x="596" y="272">པ་ར་མི་ཏ་ནཱ་མ་མ་ཧཱ་ཡ་ན་སཱུ་ཏྲ། བོད་སྐད་</text>
+      <text x="596" y="332">དུ། འཕགས་པ་ཤེས་རབ་ཀྱི་ཕ་རོལ་ཏུ་ཕྱིན་པ་</text>
+      <text x="596" y="392">རྡོ་རྗེ་གཅོད་པ་ཞེས་བྱ་བ་ཐེག་པ་ཆེན་པོའི་མདོ།</text>
+    </g>
+  </g>
+
+  <!-- ============ vajra ============ -->
+  <g transform="translate(512 456)">
+    <g id="vajraHalf" fill="url(#gold)" stroke="#8e6620" stroke-width="1.2">
+      <path d="M14 -9 L34 -7 L40 0 L34 7 L14 9 Z"/>
+      <rect x="38" y="-15" width="9" height="30" rx="3"/>
+      <path d="M47 0 C47 -21 60 -27 70 -27 C80 -27 92 -21 92 0 C92 21 80 27 70 27 C60 27 47 21 47 0 Z"/>
+      <rect x="92" y="-13" width="8" height="26" rx="3"/>
+      <path d="M100 -4 L128 -2.6 L134 0 L128 2.6 L100 4 Z"/>
+      <path d="M100 -10 C112 -25 124 -27 130 -22 C134 -18 132 -10 126 -5 L120 -6 C124 -11 124 -16 121 -17 C117 -18 110 -13 104 -6 Z"/>
+      <path d="M100 10 C112 25 124 27 130 22 C134 18 132 10 126 5 L120 6 C124 11 124 16 121 17 C117 18 110 13 104 6 Z"/>
+    </g>
+    <use href="#vajraHalf" transform="scale(-1 1)"/>
+    <circle cx="0" cy="0" r="16" fill="url(#gold)" stroke="#8e6620" stroke-width="1.2"/>
+    <circle cx="-4" cy="-5" r="5" fill="#fff2cd" opacity="0.75"/>
+  </g>
+
+  <!-- ============ lower plaque ============ -->
+  <g>
+    <rect x="196" y="518" width="646" height="250" rx="40" fill="#0d0c0a" stroke="#2a251c" stroke-width="1.5"/>
+    <rect x="208" y="504" width="656" height="258" rx="40" fill="#131110" stroke="#332c21" stroke-width="1.5"/>
+    <rect x="218" y="488" width="664" height="280" rx="42" fill="url(#card)" stroke="#3a3226" stroke-width="2"/>
+    <g fill="url(#gold)" font-family="Jomolhari" font-size="34" text-anchor="middle">
+      <text x="550" y="534">འདི་སྐད་བདག་གིས་ཐོས་པ་དུས་གཅིག་ན། བཅོམ་</text>
+      <text x="550" y="582">ལྡན་འདས་མཉན་ཡོད་ན་རྒྱལ་བུ་རྒྱལ་བྱེད་ཀྱི་ཚལ་</text>
+      <text x="550" y="630">མགོན་མེད་ཟས་སྦྱིན་གྱི་ཀུན་དགའ་ར་བ་ན། དགེ་</text>
+      <text x="550" y="678">སློང་གི་དགེ་འདུན་ཆེན་པོ་དང་ཐབས་གཅིག་ཏུ་</text>
+      <text x="550" y="726">བཞུགས་སོ། །ཕྱག་འཚལ་ལོ། །</text>
+    </g>
+  </g>
+
+  <!-- ============ diamond ============ -->
+  <g transform="translate(512 768) scale(0.85)">
+    <circle cx="0" cy="0" r="118" fill="url(#glow)"/>
+    <g opacity="0.5" filter="url(#softGlow)">
+      <path d="M0 -120 L9 -8 L0 96 L-9 -8 Z" fill="#ffe6a4"/>
+      <path d="M-128 0 L-8 -8 L118 0 L-8 8 Z" fill="#ffe6a4"/>
+    </g>
+    <g stroke="#a97c28" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M-30 -44 L30 -44 L42 -8 L-42 -8 Z" fill="url(#gemA)"/>
+      <path d="M-58 -44 L-30 -44 L-42 -8 L-80 -8 Z" fill="url(#gemB)"/>
+      <path d="M58 -44 L30 -44 L42 -8 L80 -8 Z" fill="url(#gemB)"/>
+      <path d="M-80 -8 L-42 -8 L0 58 Z" fill="url(#gemC)"/>
+      <path d="M-42 -8 L42 -8 L0 58 Z" fill="url(#gemA)"/>
+      <path d="M42 -8 L80 -8 L0 58 Z" fill="url(#gemC)"/>
+    </g>
+    <path d="M-58 -44 L58 -44" stroke="#fff6d8" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
+  </g>
+
+  <!-- ============ wordmark ============ -->
+  <text x="512" y="936" fill="url(#gold)" font-family="EB Garamond" font-weight="700"
+        font-size="96" letter-spacing="2" text-anchor="middle"
+        textLength="744" lengthAdjust="spacingAndGlyphs">VAJRACHHEDIKA</text>
+</svg>

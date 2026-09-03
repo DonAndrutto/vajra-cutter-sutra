@@ -4,6 +4,7 @@
 import { useAppContext, View } from "@/context/app-context";
 import { Button } from "@/components/ui/button";
 import LanguageSelector from "@/components/language-selector";
+import InstallAppButton from "@/components/install-app-button";
 import { BookMarked, BookOpen, List, Info, Heart } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
@@ -67,6 +68,7 @@ export default function Header({ isVisible }: { isVisible: boolean }) {
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-1">
             <LanguageSelector />
+            <InstallAppButton />
             {!isMobile && (
               <Button
                   variant="outline"

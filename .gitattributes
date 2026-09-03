@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Icon artwork must never be line-ending normalised.
+*.png binary
+*.ico binary
+*.ttf binary
+*.woff2 binary

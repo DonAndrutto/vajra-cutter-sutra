@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline — Vajra-Cutter Sutra Reader</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: #0b0a09;
+        color: #e8dfcf;
+        font-family: Georgia, 'Times New Roman', serif;
+        text-align: center;
+      }
+      main {
+        max-width: 30rem;
+      }
+      img {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 1.75rem;
+      }
+      h1 {
+        margin: 0 0 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #d9b25f;
+      }
+      p {
+        margin: 0 0 1.75rem;
+        line-height: 1.6;
+        color: #a99e8c;
+      }
+      button {
+        font: inherit;
+        color: #0b0a09;
+        background: #d9b25f;
+        border: 0;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e8ca86;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" />
+      <h1>The reader is offline</h1>
+      <p>
+        This page has not been stored on your device yet. Open the reader once while connected and
+        it will stay available offline from then on.
+      </p>
+      <button type="button" onclick="location.replace('/')">Try again</button>
+    </main>
+  </body>
+</html>
