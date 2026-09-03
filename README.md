@@ -36,21 +36,22 @@ in it** — the cache names derive from it, and a bump discards the previous gen
 
 ## Icons
 
-`scripts/icon-source.svg` is the master artwork. The PNGs under `public/icons/`, plus
-`src/app/icon.png` and `src/app/apple-icon.png`, are its build output — regenerate them rather
-than editing them by hand:
+`scripts/icon-source.webp` is the master artwork. The PNGs under `public/icons/`, plus
+`src/app/icon.png` and `src/app/apple-icon.png`, are cut from it — regenerate them rather than
+editing them by hand, and replace the source file to change the artwork:
 
 ```bash
-npm i -D playwright && npx playwright install chromium
+npm i -D sharp
 node scripts/generate-icons.mjs
 ```
 
-The artwork sets Tibetan in [Jomolhari](https://fonts.google.com/specimen/Jomolhari) and the
-wordmark in [EB Garamond](https://fonts.google.com/specimen/EB+Garamond); both must be installed
-locally or the renderer falls back to a face with no Tibetan glyphs.
+The script trims the artwork to its own bounds and letterboxes it back to a square, so a source
+that is not perfectly square still yields square icons.
 
-The `maskable` variants inset the plaque into the inner 80% of the canvas, because Android
-reshapes maskable icons to its launcher's silhouette and crops everything outside that safe zone.
+The `maskable` variants inset the plaque into the inner 80% of the canvas over a field matching
+the plaque's black, because Android reshapes maskable icons to its launcher's silhouette and
+crops everything outside that safe zone. `apple-icon.png` is flattened onto the same field, since
+iOS ignores transparency and applies its own rounded mask.
 
 ## Development
 
