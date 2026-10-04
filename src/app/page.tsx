@@ -14,13 +14,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { sutraData } from '@/data/sutra-data';
 import { glossaryData, GlossaryTerm } from '@/data/glossary-data';
-import { Heart } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { usePagedReader } from '@/hooks/use-paged-reader';
+import PageNavigation from '@/components/page-navigation';
 import { cn } from '@/lib/utils';
 
 const IntroductionView = () => {
-  const { setView, setIsDonationModalOpen } = useAppContext();
-  const isMobile = useIsMobile();
+  const { setView } = useAppContext();
 
   return (
     <div className="space-y-6">
@@ -33,6 +32,9 @@ const IntroductionView = () => {
       </p>
       <p className="text-lg leading-relaxed text-justify">
         This app is designed to support your practice. Compare translations side-by-side in Sanskrit, Tibetan, and English. Use the auto-scroll for recitation, adjust the text size for comfort, and explore the glossary for key terms.
+      </p>
+      <p className="text-lg leading-relaxed text-justify">
+        Select the page icon between + and Fullscreen to turn pages without animation. Use the arrows below the text, tap the left or right edge, or use arrow keys, Page Up/Down, or Space (Shift+Space to go back). Pages keep whole lines and adapt to portrait, landscape, language, and text size. Fullscreen leaves only its expand/contract control; edge taps and keyboard page turns still work. The up arrow returns to the beginning of the text.
       </p>
       <p className="text-lg leading-relaxed text-justify">
         The sutra works through paradox. It uses language to dismantle the traps of language itself. As the Buddha taught, his teaching is like a raft: essential for crossing the river, but left behind once you reach the other shore. This wisdom points to a truth that is ineffable, yet directly experienceable.
@@ -70,15 +72,19 @@ const SutraView = () => {
       isTiltScrolling,
       setReadingStartTime,
       permissionGranted,
-      setIsScrolling
+      setIsScrolling,
+      readingMode
     } = useAppContext();
     const scrollIntervalRef = useRef<number | null>(null);
+    const areaRef = useRef<HTMLDivElement>(null);
 
     const activeLanguage = useMemo(() => {
         if (language === 'tibetan') return tibetanScript;
         if (language === 'sanskrit') return sanskritScript;
         return language;
     }, [language, tibetanScript, sanskritScript]);
+
+    usePagedReader(areaRef, activeLanguage);
 
     const stopScrolling = useCallback(() => {
         if (scrollIntervalRef.current) {
@@ -112,15 +118,16 @@ const SutraView = () => {
     }, [stopScrolling, manualScroll, setReadingStartTime, scrollSpeed, setIsScrolling]);
   
     useEffect(() => {
-        if (isScrolling) {
+        if (isScrolling && readingMode === 'scroll') {
             startScrolling();
         } else {
             stopScrolling();
         }
         return stopScrolling;
-    }, [isScrolling, startScrolling, stopScrolling]);
+    }, [isScrolling, readingMode, startScrolling, stopScrolling]);
 
     useEffect(() => {
+      if (readingMode === 'pages') return;
       let animationFrameId: number | null = null;
       let referenceBeta: number | null = null;
     
@@ -170,26 +177,30 @@ const SutraView = () => {
       }
     
       return stop;
-    }, [isTiltScrolling, permissionGranted, scrollSpeed, setReadingStartTime]);
+    }, [isTiltScrolling, readingMode, permissionGranted, scrollSpeed, setReadingStartTime]);
 
 
     useEffect(() => {
+      if (readingMode === 'pages') return;
+      let resumeTimer: ReturnType<typeof setTimeout>;
       const handleWheel = () => {
           if (isScrolling) {
               stopScrolling();
           }
           setManualScroll(true);
-          setTimeout(() => setManualScroll(false), 2000);
+          clearTimeout(resumeTimer);
+          resumeTimer = setTimeout(() => setManualScroll(false), 2000);
       };
       
       window.addEventListener('wheel', handleWheel, { passive: true });
       window.addEventListener('touchmove', handleWheel, { passive: true });
       
       return () => {
+          clearTimeout(resumeTimer);
           window.removeEventListener('wheel', handleWheel);
           window.removeEventListener('touchmove', handleWheel);
       };
-  }, [setManualScroll, isScrolling, stopScrolling]);
+  }, [setManualScroll, isScrolling, readingMode, stopScrolling]);
   
     const titleSection = sutraData.find(s => s.section === 0);
     const sutraSections = sutraData.filter(s => s.section > 0);
@@ -223,68 +234,35 @@ const SutraView = () => {
         return textSize;
       }, [activeLanguage, textSize]);
   
-    return (
-      <div 
-        style={{ fontSize: `${currentTextSize}rem` }} 
-        className={`transition-all duration-300 relative ${getFontClass()}`}
-      >
-        <h2 className="font-headline text-3xl md:text-4xl text-center text-primary mb-4 pt-12">{titleSection?.title[activeLanguage] || titleSection?.title['english']}</h2>
-        {titleSection?.content[activeLanguage]?.map((paragraph, index) => (
-          <p key={index} className="text-center text-muted-foreground italic mb-8">{paragraph}</p>
-        ))}
-  
-        <div className="space-y-8 mt-8">
-          {sutraSections.map(item => (
-            <div key={item.section} id={`section-${item.section}`} className="sutra-section scroll-mt-24">
-              <h3 className="font-headline text-xl font-semibold text-primary/80 mb-4 border-b pb-2">
-                Section {item.section}{item.title['english'] && `: ${item.title['english']}`}
-              </h3>
-              {item.content[activeLanguage]?.map((paragraph, index) => (
-                <p key={index} className={cn("text-justify my-4", (activeLanguage === 'english' || activeLanguage === 'tibetan-translit') ? 'leading-relaxed' : 'leading-loose')}>
-                  {renderText(paragraph)}
-                </p>
-              ))}
-            </div>
-          ))}
-        </div>
-        
-        <footer className="mt-16 py-8 text-center">
-          <p className="text-xs text-muted-foreground/50 font-sans">
-            Copyright: Andrzej R. Rybszleger 2025
-          </p>
-          <p className="text-xs text-muted-foreground/50 font-sans">
-            rybszlegerr@gmail.com
-          </p>
-        </footer>
-      </div>
-    );
-  };
+    return <div ref={areaRef} id="contentArea" data-language={activeLanguage}
+      style={{fontSize:`min(${currentTextSize}rem, var(--page-font-cap, 1000px))`}}
+      className={`content-area ${getFontClass()}`}>
+      <section className="section-block" id="section-0" data-section="0">
+        <h2 className="sutra-title" data-reading-block="0-title">{titleSection?.title[activeLanguage] || titleSection?.title.english}</h2>
+        {titleSection?.content[activeLanguage]?.map((paragraph, index) =>
+          <p key={index} className="sutra-title-text" data-reading-block={`0-${index}`}>{paragraph}</p>)}
+      </section>
+      {sutraSections.map((item, sectionIndex) => <section key={item.section} id={`section-${item.section}`} data-section={item.section} className="section-block">
+        <h3 className="section-heading" data-reading-block={`${item.section}-title`}>Section {item.section}{item.title.english && `: ${item.title.english}`}</h3>
+        {item.content[activeLanguage]?.map((paragraph, index) => <p key={index} data-reading-block={`${item.section}-${index}`}
+          className={`sutra-paragraph ${activeLanguage === 'tibetan' || activeLanguage === 'sanskrit-devanagari' ? 'native-script' : ''}`}>{renderText(paragraph)}</p>)}
+        {sectionIndex === sutraSections.length - 1 && <footer className="sutra-footer" data-reading-block="copyright">
+          <p>Copyright: Andrzej R. Rybszleger 2025</p><p>rybszlegerr@gmail.com</p>
+        </footer>}
+      </section>)}
+    </div>;
+};
 
 
 const IndexView = () => {
-    const { setView, setManualScroll } = useAppContext();
+    const {setView, navigateReader, readerPosition, setIsScrolling, setIsTiltScrolling} = useAppContext();
     const sections = sutraData.filter(s => s.section > 0);
-  
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, section: number) => {
       e.preventDefault();
+      setIsScrolling(false);
+      setIsTiltScrolling(false);
       setView('sutra');
-      setManualScroll(true); // Pause auto-scrolling
-      
-      setTimeout(() => {
-        const element = document.getElementById(`section-${section}`);
-        if (element) {
-          const headerOffset = 80;
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-          window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth"
-          });
-        }
-      }, 100);
-
-      setTimeout(() => setManualScroll(false), 2000); // Resume auto-scrolling after a delay
+      navigateReader('section', section);
     };
   
   
@@ -296,7 +274,8 @@ const IndexView = () => {
                 <li key={item.section}>
                   <a href={`#section-${item.section}`} 
                      onClick={(e) => handleLinkClick(e, item.section)}
-                     className="block p-4 hover:bg-accent transition-colors duration-200 font-sans">
+                     aria-current={readerPosition.section === item.section ? 'location' : undefined}
+                     className={`index-item ${readerPosition.section === item.section ? 'is-current' : ''}`}>
                     Section {item.section}{item.title['english'] && `: ${item.title['english']}`}
                   </a>
                 </li>
@@ -407,7 +386,7 @@ const MainContent = ({ view }: { view: View }) => {
   }
 
   return (
-      <main className="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className={`reader-main ${mainView === 'introduction' ? 'introduction-main' : ''}`}>
           {mainView === 'introduction' && <IntroductionView />}
           {mainView === 'sutra' && <SutraView />}
       </main>
@@ -416,22 +395,9 @@ const MainContent = ({ view }: { view: View }) => {
 
 export default function Home() {
   const { view, setView, isUiVisible } = useAppContext();
-  const [scrollTop, setScrollTop] = useState(0);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    
-    const handleScroll = () => {
-      setScrollTop(window.scrollY);
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  useEffect(() => {setMounted(true);}, []);
 
   const isSheetOpen = view === 'index' || view === 'glossary';
 
@@ -446,25 +412,10 @@ export default function Home() {
   }
 
   return (
-      <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-500 pb-20">
-        <div 
-          className={cn(
-            "h-[150px] flex items-center justify-center text-center relative transition-opacity duration-300",
-            !isUiVisible && 'opacity-0',
-            isSheetOpen && 'opacity-0'
-          )}
-          style={{ opacity: isSheetOpen ? 0 : Math.max(0, 1 - scrollTop / 100) }}
-        >
-          <h1 className="font-headline text-[clamp(2.5rem,8vw,4.5rem)] font-bold text-primary tracking-tight">
-            Vajra-Cutter Sutra Reader
-          </h1>
-        </div>
-        <Header isVisible={isUiVisible && !isSheetOpen} />
-        
-        <div className={`transition-all duration-500 ${isSheetOpen ? 'blur-sm brightness-50' : ''}`}>
-          <MainContent view={view} />
-        </div>
-        
+      <div className={`reader-shell ${!isUiVisible ? 'fullscreen' : ''}`}>
+        <Header isVisible={isUiVisible} />
+        <MainContent view={view} />
+
         <Sheet open={isSheetOpen} onOpenChange={handleSheetChange}>
             <SheetContent className="sm:max-w-md w-full flex flex-col p-0 bg-background/95 backdrop-blur-xl border-l">
                 <SheetHeader className="p-4 border-b">
@@ -475,12 +426,10 @@ export default function Home() {
             </SheetContent>
         </Sheet>
         
+        <PageNavigation />
         <ScrollToTopButton />
         <BottomBar />
         <DonationModal />
       </div>
   );
 }
-
-    
-    

@@ -3,6 +3,10 @@
 A Next.js reader for the Vajracchedikā Prajñāpāramitā Sūtra in Sanskrit, Tibetan and English.
 To get started, take a look at `src/app/page.tsx`.
 
+The page icon between **+** and **Fullscreen** switches between scrolling and page turning. Pages turn instantly, keep whole lines, and reflow in portrait or landscape while preserving the passage during text-size and fullscreen changes. Use the page arrows, left/right edge taps, arrow keys, Page Up/Down, or Space / Shift+Space. The mode is saved locally. The up arrow always returns to the beginning of the sutra.
+
+The shared header and bottom controls use Ewam's visual style and exact reader icons. All bottom controls are expanded by default; fullscreen leaves only its expand/contract control, with edge taps and keyboard turns still available. Sanskrit, Tibetan, phonetic variants, English, the index, glossary filter, and offline installation remain available. Automatic and tilt scrolling are disabled in page mode.
+
 ## Installing the app
 
 The reader is a progressive web app: it can be installed to a phone's home screen and read with
@@ -61,3 +65,7 @@ npm run build      # production build
 npm run start      # serve the production build
 npm run typecheck  # tsc --noEmit
 ```
+
+For browser regression checks, run `npx playwright install chromium`, start the reader, then run `npm run test:reader`. The suite checks every section in all five text variants across portrait, landscape, narrow screens, and maximum text size, along with navigation, reflow, fullscreen, index, glossary, automatic scrolling, and saved mode. Screenshots go to `test-results/`.
+
+Set `READER_URL` to another preview URL or `READER_BROWSER_PATH` to an installed Chrome executable. Set `EWAM_REFERENCE_HTML` to Ewam's revised `index.html` to compare shared icons and rendered styles; a sibling Ewam checkout is detected automatically. To check offline reading as well, build and serve the production app, then run the suite with `READER_OFFLINE=1`.

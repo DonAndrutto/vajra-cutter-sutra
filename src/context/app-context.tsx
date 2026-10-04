@@ -1,13 +1,16 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 
 export type View = 'introduction' | 'sutra' | 'index' | 'glossary';
 export type Language = 'sanskrit' | 'tibetan' | 'english';
 export type TibetanScript = 'tibetan' | 'tibetan-translit';
 export type SanskritScript = 'sanskrit-devanagari' | 'sanskrit-translit';
 export type Theme = 'light' | 'dark';
+export type ReadingMode = 'scroll' | 'pages';
+export type ReaderPosition = { section: number; page: number; count: number; sections: number };
+export type ReaderNavigation = { id: number; kind: 'turn' | 'start' | 'section'; value: number };
 
 interface AppContextType {
   view: View;
@@ -40,6 +43,12 @@ interface AppContextType {
   setReadingStartTime: (time: number | null) => void;
   permissionGranted: boolean;
   setPermissionGranted: (granted: boolean) => void;
+  readingMode: ReadingMode;
+  setReadingMode: (mode: ReadingMode) => void;
+  readerPosition: ReaderPosition;
+  setReaderPosition: React.Dispatch<React.SetStateAction<ReaderPosition>>;
+  readerNavigation: ReaderNavigation | null;
+  navigateReader: (kind: ReaderNavigation['kind'], value?: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -60,6 +69,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [manualScroll, setManualScroll] = useState<boolean>(false);
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+  const [readingMode, setReadingMode] = useState<ReadingMode>('scroll');
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const [readerPosition, setReaderPosition] = useState<ReaderPosition>({section:0, page:0, count:1, sections:1});
+  const [readerNavigation, setReaderNavigation] = useState<ReaderNavigation | null>(null);
+  const navigateReader = useCallback((kind: ReaderNavigation['kind'], value = 0) => {
+    setReaderNavigation(previous => ({id:(previous?.id || 0) + 1, kind, value}));
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('vcs-reading-mode') === 'pages') setReadingMode('pages');
+    } catch { /* Reading also works when browser storage is unavailable. */ }
+    setPreferencesLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesLoaded) return;
+    try { localStorage.setItem('vcs-reading-mode', readingMode); } catch {}
+    if (readingMode === 'pages') {
+      setIsScrolling(false);
+      setIsTiltScrolling(false);
+    }
+  }, [readingMode, preferencesLoaded]);
+
+  useEffect(() => {
+    const syncFullscreen = () => {
+      if (!document.fullscreenElement) setIsUiVisible(true);
+    };
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,7 +108,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     return () => clearTimeout(timer);
   }, []);
-  
+
   useEffect(() => {
     if (isScrolling || isTiltScrolling) {
         if (!readingStartTime) {
@@ -78,7 +118,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setReadingStartTime(null);
     }
   }, [isScrolling, isTiltScrolling, readingStartTime]);
-  
+
   const value = {
     view,
     setView,
@@ -109,7 +149,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     readingStartTime,
     setReadingStartTime,
     permissionGranted,
-    setPermissionGranted
+    setPermissionGranted,
+    readingMode,
+    setReadingMode,
+    readerPosition,
+    setReaderPosition,
+    readerNavigation,
+    navigateReader
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -123,4 +169,4 @@ export function useAppContext() {
   return context;
 }
 
-    
+

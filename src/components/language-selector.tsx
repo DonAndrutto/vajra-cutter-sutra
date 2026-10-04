@@ -1,108 +1,21 @@
-
 "use client";
 
-import { useAppContext, Language, TibetanScript, SanskritScript } from "@/context/app-context";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-const LanguageButton = ({
-  targetLang,
-  label,
-  className,
-  children
-}: {
-  targetLang: Language;
-  label?: React.ReactNode;
-  className?: string;
-  children?: React.ReactNode;
-}) => {
-  const { language, setLanguage, setView } = useAppContext();
-  const isActive = language === targetLang;
-
-  const handleClick = () => {
-    setLanguage(targetLang);
-    setView('sutra');
-  };
-
-  return (
-    <Button
-      size="sm"
-      variant={isActive ? "default" : "ghost"}
-      onClick={handleClick}
-      className={cn("font-sans h-8 px-2 transition-all duration-300", className)}
-    >
-      {children || label}
-    </Button>
-  );
-};
-
-const ScriptToggleButton = ({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: (e: React.MouseEvent) => void;
-  label: React.ReactNode;
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className={cn(
-        "font-sans h-full px-2 rounded-sm transition-colors duration-200 text-sm cursor-pointer flex items-center justify-center",
-        active ? "bg-background/80 text-primary" : "text-primary-foreground/80 hover:bg-background/20"
-      )}
-    >
-      {label}
-    </div>
-  );
-};
+import { Language, useAppContext } from "@/context/app-context";
 
 export default function LanguageSelector() {
-    const { language, tibetanScript, setTibetanScript, sanskritScript, setSanskritScript } = useAppContext();
-
-  const handleScriptClick = (e: React.MouseEvent, scriptSetter: (script: any) => void, script: any) => {
-    e.stopPropagation();
-    scriptSetter(script);
-  }
-
-  return (
-    <div className="flex items-center space-x-0.5 rounded-md bg-secondary/80 p-0.5 text-sm">
-      <LanguageButton targetLang="english" label="ENG" />
-      
-      <LanguageButton 
-        targetLang="tibetan"
-        className={cn(
-          "w-auto p-0 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:hover:bg-primary/10",
-          language === 'tibetan' ? '!bg-primary/10' : ''
-        )}
-      >
-        {language === 'tibetan' ? (
-            <div className="flex items-center justify-center w-full h-full bg-primary rounded-[5px] p-0.5 gap-0.5">
-                <ScriptToggleButton active={tibetanScript === 'tibetan'} onClick={(e) => handleScriptClick(e, setTibetanScript, 'tibetan')} label="བོད་ཡིག" />
-                <ScriptToggleButton active={tibetanScript === 'tibetan-translit'} onClick={(e) => handleScriptClick(e, setTibetanScript, 'tibetan-translit')} label="TIB" />
-            </div>
-        ) : (
-            <span className="px-2">TIB</span>
-        )}
-      </LanguageButton>
-
-      <LanguageButton 
-        targetLang="sanskrit"
-        className={cn(
-          "w-auto p-0 data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:hover:bg-primary/10",
-          language === 'sanskrit' ? '!bg-primary/10' : ''
-        )}
-      >
-        {language === 'sanskrit' ? (
-            <div className="flex items-center justify-center w-full h-full bg-primary rounded-[5px] p-0.5 gap-0.5">
-                <ScriptToggleButton active={sanskritScript === 'sanskrit-devanagari'} onClick={(e) => handleScriptClick(e, setSanskritScript, 'sanskrit-devanagari')} label="संस्कृत" />
-                <ScriptToggleButton active={sanskritScript === 'sanskrit-translit'} onClick={(e) => handleScriptClick(e, setSanskritScript, 'sanskrit-translit')} label="SKT" />
-            </div>
-        ) : (
-             <span className="px-2">SKT</span>
-        )}
-      </LanguageButton>
-    </div>
-  );
+  const {language, setLanguage, setView, tibetanScript, setTibetanScript, sanskritScript, setSanskritScript} = useAppContext();
+  const select = (value: Language) => {setLanguage(value); setView('sutra');};
+  return <div className="language-selector" aria-label="Text language">
+    {(['english','tibetan','sanskrit'] as const).map((value, index) => <button type="button" key={value}
+      className={`lang-btn ${language === value ? 'active' : ''}`} aria-label={value[0].toUpperCase() + value.slice(1)} aria-pressed={language === value}
+      onClick={() => select(value)}>{['ENG','TIB','SKT'][index]}</button>)}
+    {language === 'tibetan' && <div className="script-selector" aria-label="Tibetan script">
+      <button type="button" className={`lang-btn ${tibetanScript === 'tibetan' ? 'active' : ''}`} aria-label="Tibetan script" aria-pressed={tibetanScript === 'tibetan'} onClick={() => setTibetanScript('tibetan')}>བོད་ཡིག</button>
+      <button type="button" className={`lang-btn ${tibetanScript === 'tibetan-translit' ? 'active' : ''}`} aria-label="Tibetan phonetics" aria-pressed={tibetanScript === 'tibetan-translit'} onClick={() => setTibetanScript('tibetan-translit')}>PHO</button>
+    </div>}
+    {language === 'sanskrit' && <div className="script-selector" aria-label="Sanskrit script">
+      <button type="button" className={`lang-btn ${sanskritScript === 'sanskrit-devanagari' ? 'active' : ''}`} aria-label="Devanagari script" aria-pressed={sanskritScript === 'sanskrit-devanagari'} onClick={() => setSanskritScript('sanskrit-devanagari')}>संस्कृत</button>
+      <button type="button" className={`lang-btn ${sanskritScript === 'sanskrit-translit' ? 'active' : ''}`} aria-label="Sanskrit phonetics" aria-pressed={sanskritScript === 'sanskrit-translit'} onClick={() => setSanskritScript('sanskrit-translit')}>PHO</button>
+    </div>}
+  </div>;
 }
