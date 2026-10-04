@@ -1,66 +1,24 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
-import { ArrowUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import ReaderIcon from '@/components/reader-icon';
 import { useAppContext } from '@/context/app-context';
 
 export default function ScrollToTopButton() {
-  const { view, isUiVisible } = useAppContext();
-  const [isVisible, setIsVisible] = useState(false);
-
-  const toggleVisibility = () => {
-    const firstSection = document.getElementById('section-1');
-    if (firstSection) {
-      if (window.scrollY > firstSection.offsetTop) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    } else {
-        // Fallback for introduction view
-        if (window.scrollY > 300) {
-            setIsVisible(true);
-        } else {
-            setIsVisible(false);
-        }
-    }
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
+  const {view, isUiVisible, readingMode, readerPosition, navigateReader, setIsScrolling, setIsTiltScrolling} = useAppContext();
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
-    return () => {
-      window.removeEventListener('scroll', toggleVisibility);
-    };
+    const update = () => setScrolled(window.scrollY > 300);
+    update();
+    window.addEventListener('scroll', update, {passive:true});
+    return () => window.removeEventListener('scroll', update);
   }, []);
-
-  if (view !== 'sutra' && view !== 'introduction') {
-    return null;
-  }
-
-  return (
-    <div className="fixed top-20 right-4 z-50">
-      <Button
-        size="icon"
-        onClick={scrollToTop}
-        className={`h-9 w-9 transition-opacity duration-300 ${
-          isVisible && isUiVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        variant="outline"
-        aria-label="Scroll to top"
-      >
-        <ArrowUp className="h-4 w-4" />
-      </Button>
-    </div>
-  );
+  const visible = view === 'sutra' && readingMode === 'pages' ? readerPosition.section > 0 || readerPosition.page > 0 : scrolled;
+  if (!isUiVisible || !visible || (view !== 'sutra' && view !== 'introduction')) return null;
+  return <button type="button" className="scroll-top-btn visible" id="scrollTopBtn" title="Back to top" aria-label="Back to top" onClick={() => {
+    setIsScrolling(false);
+    setIsTiltScrolling(false);
+    if (view === 'sutra') navigateReader('start');
+    else window.scrollTo({top:0, behavior:'instant'});
+  }}><ReaderIcon name="top" /></button>;
 }
-
-    

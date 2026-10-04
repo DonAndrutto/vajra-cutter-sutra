@@ -1,13 +1,10 @@
-
 "use client";
 
 import { useAppContext } from "@/context/app-context";
-import { Button } from "@/components/ui/button";
-import { Plus, Minus, Play, Pause, ZoomIn, ZoomOut, Fullscreen, Minimize, TimerIcon, Move3d } from "lucide-react";
+import { TimerIcon } from "lucide-react";
 import ThemeSwitcher from "@/components/theme-switcher";
-import { useIsMobile } from "@/hooks/use-mobile";
+import ReaderIcon from "@/components/reader-icon";
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
 
 const Timer = () => {
     const { isScrolling, readingStartTime, scrollSpeed, isTiltScrolling } = useAppContext();
@@ -78,135 +75,56 @@ const Timer = () => {
 
 
 export default function BottomBar() {
-  const {
-    textSize,
-    setTextSize,
-    scrollSpeed,
-    setScrollSpeed,
-    isScrolling,
-    setIsScrolling,
-    isTiltScrolling,
-    setIsTiltScrolling,
-    view,
-    isUiVisible,
-    setIsUiVisible,
-    setPermissionGranted,
-    permissionGranted
-  } = useAppContext();
-  const isMobile = useIsMobile();
-
-  const handleTextSize = (amount: number) => {
-    setTextSize(s => Math.max(0.5, Math.min(s + amount, 2.5)));
+  const {setTextSize, setScrollSpeed, isScrolling, setIsScrolling, isTiltScrolling,
+    setIsTiltScrolling, view, isUiVisible, setIsUiVisible, setPermissionGranted,
+    permissionGranted, readingMode, setReadingMode} = useAppContext();
+  const paged = readingMode === 'pages';
+  const togglePages = () => {
+    setIsScrolling(false);
+    setIsTiltScrolling(false);
+    setReadingMode(paged ? 'scroll' : 'pages');
   };
-
-  const handleScrollSpeed = (amount: number) => {
-    setScrollSpeed(s => Math.max(0.1, Math.min(s + amount, 5)));
+  const toggleFullscreen = () => {
+    setIsUiVisible(!isUiVisible);
+    if (isUiVisible) document.documentElement.requestFullscreen?.().catch(() => {});
+    else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
   };
-
-  const requestTiltPermission = async () => {
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      try {
-        const permission = await (DeviceOrientationEvent as any).requestPermission();
-        if (permission === 'granted') {
-          setPermissionGranted(true);
-          setIsTiltScrolling(true);
-        } else {
-          alert('Permission to access device orientation was denied.');
-          setIsTiltScrolling(false);
-          setPermissionGranted(false);
-        }
-      } catch (error) {
-        console.error("Error requesting device orientation permission:", error);
-        setIsTiltScrolling(false);
-        setPermissionGranted(false);
-      }
-    } else {
-      // For devices that don't require permission
-      setPermissionGranted(true);
-      setIsTiltScrolling(true);
-    }
+  const toggleTilt = async () => {
+    if (paged) return;
+    setIsScrolling(false);
+    if (isTiltScrolling) { setIsTiltScrolling(false); return; }
+    const orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<string>;
+    };
+    try {
+      const granted = permissionGranted || !orientation?.requestPermission || await orientation.requestPermission() === 'granted';
+      setPermissionGranted(granted);
+      if (!document.documentElement.classList.contains('paged-reading')) setIsTiltScrolling(granted);
+    } catch { setPermissionGranted(false); setIsTiltScrolling(false); }
   };
-
-  const toggleTiltScroll = () => {
-      if (isTiltScrolling) {
-          setIsTiltScrolling(false);
-      } else {
-          if (permissionGranted) {
-              setIsTiltScrolling(true);
-          } else {
-              requestTiltPermission();
-          }
-      }
-      if (isScrolling) {
-          setIsScrolling(false);
-      }
-  };
-
-
-  const toggleAutoScroll = () => {
-    setIsScrolling(s => !s);
-    if(isTiltScrolling) {
-      setIsTiltScrolling(false);
-    }
-  }
-
-  if (view !== 'sutra') {
-    return null;
-  }
-  
-  const controlStyles = "flex items-center gap-1 p-1 bg-background/80 backdrop-blur-lg rounded-md border"
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-        <div className="relative max-w-lg mx-auto h-12 flex items-center justify-between">
-            <div className={cn(controlStyles, "transition-opacity duration-300", !isUiVisible ? 'opacity-0 pointer-events-none' : 'opacity-100')}>
-                <Button variant="ghost" size="icon" onClick={() => handleScrollSpeed(-0.2)} aria-label="Decrease scroll speed" className="h-9 w-9">
-                    <Minus className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={toggleAutoScroll} aria-label={isScrolling ? 'Pause scrolling' : 'Play scrolling'} className={cn("h-9 w-9", isScrolling && "text-primary bg-primary/10")}>
-                    {isScrolling ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleScrollSpeed(0.2)} aria-label="Increase scroll speed" className="h-9 w-9">
-                    <Plus className="h-5 w-5" />
-                </Button>
-            </div>
-            
-            <div className={cn(controlStyles, "absolute left-1/2 -translate-x-1/2")}>
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-9 w-9"
-                    onClick={() => setIsUiVisible((v) => !v)}
-                    aria-label="Toggle UI visibility"
-                >
-                    {isUiVisible ? <Fullscreen className="h-5 w-5" /> : <Minimize className="h-5 w-5" />}
-                </Button>
-                 <Button variant="ghost" size="icon" onClick={toggleTiltScroll} aria-label="Toggle tilt scroll" className={cn("h-9 w-9", isTiltScrolling && "text-primary bg-primary/10")}>
-                    <Move3d className="h-5 w-5" />
-                </Button>
-                <ThemeSwitcher />
-            </div>
-
-            <div className={cn(controlStyles, "transition-opacity duration-300", !isUiVisible ? 'opacity-0 pointer-events-none' : 'opacity-100')}>
-                 <Button variant="ghost" size="icon" onClick={() => handleTextSize(-0.1)} aria-label="Decrease text size" className="h-9 w-9">
-                    <ZoomOut className="h-5 w-5" />
-                </Button>
-                {!isMobile && <span className="w-10 text-center font-sans text-sm tabular-nums">{((textSize / 1.25) * 100).toFixed(0)}%</span>}
-                <Button variant="ghost" size="icon" onClick={() => handleTextSize(0.1)} aria-label="Increase text size" className="h-9 w-9">
-                    <ZoomIn className="h-5 w-5" />
-                </Button>
-            </div>
-        </div>
-        <div className={cn(
-            "absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-1 bg-background/80 backdrop-blur-lg rounded-md border transition-opacity duration-300",
-            (isScrolling || isTiltScrolling) && isUiVisible ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}>
-           <Timer />
-        </div>
+  if (view === 'introduction') return null;
+  return <div className="bottom-bar">
+    <div className="bar-inner">
+      <div className="bar-group reader-toolbar">
+        <button type="button" className="bar-btn" id="btnSlower" title="Slower" aria-label="Slower" disabled={paged}
+          onClick={() => setScrollSpeed(s => Math.max(0.1, s - 0.2))}><ReaderIcon name="minus" /></button>
+        <button type="button" className={`bar-btn ${isScrolling ? 'active' : ''}`} id="btnPlay" title="Play/Pause" aria-label="Play/Pause" aria-pressed={isScrolling} disabled={paged}
+          onClick={() => {setIsTiltScrolling(false); setIsScrolling(s => !s);}}><ReaderIcon name={isScrolling ? 'pause' : 'play'} /></button>
+        <button type="button" className="bar-btn" id="btnFaster" title="Faster" aria-label="Faster" disabled={paged}
+          onClick={() => setScrollSpeed(s => Math.min(5, s + 0.2))}><ReaderIcon name="plus" /></button>
+        <button type="button" className={`bar-btn ${paged ? 'active' : ''}`} id="btnPage" title="Page turning mode" aria-label="Page turning mode" aria-pressed={paged}
+          onClick={togglePages}><ReaderIcon name="page" /></button>
+        <button type="button" className={`bar-btn ${!isUiVisible ? 'active' : ''}`} id="btnFS" title={isUiVisible ? 'Fullscreen' : 'Exit fullscreen'} aria-label={isUiVisible ? 'Fullscreen' : 'Exit fullscreen'} aria-pressed={!isUiVisible}
+          onClick={toggleFullscreen}><ReaderIcon name={isUiVisible ? 'fullscreen' : 'contract'} /></button>
+        <button type="button" className={`bar-btn ${isTiltScrolling ? 'active' : ''}`} id="btnTilt" title="Tilt scroll" aria-label="Tilt scroll" aria-pressed={isTiltScrolling} disabled={paged}
+          onClick={toggleTilt}><ReaderIcon name="tilt" /></button>
+        <ThemeSwitcher />
+        <button type="button" className="bar-btn" id="btnSmaller" title="Smaller text" aria-label="Smaller text"
+          onClick={() => setTextSize(s => Math.max(0.5, s - 0.1))}><ReaderIcon name="smaller" /></button>
+        <button type="button" className="bar-btn" id="btnLarger" title="Larger text" aria-label="Larger text"
+          onClick={() => setTextSize(s => Math.min(2.5, s + 0.1))}><ReaderIcon name="larger" /></button>
+      </div>
     </div>
-  );
+    {(isScrolling || isTiltScrolling) && isUiVisible && <div className="reader-timer"><Timer /></div>}
+  </div>;
 }
-
-    
-
-    

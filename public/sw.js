@@ -10,7 +10,7 @@
  * a bump discards the previous generation on activate.
  */
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL_CACHE = `vcs-shell-${VERSION}`;
 const ASSET_CACHE = `vcs-assets-${VERSION}`;
 const FONT_CACHE = `vcs-fonts-${VERSION}`;
@@ -20,7 +20,7 @@ const SHELL_URLS = ['/', '/offline.html'];
 
 /** Kept in sync with the stylesheet link in src/app/layout.tsx. */
 const FONT_STYLESHEET =
-  'https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Inter:wght@400;500;600;700&family=Jomolhari&display=swap';
+  'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Jomolhari&display=swap';
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
 /**
