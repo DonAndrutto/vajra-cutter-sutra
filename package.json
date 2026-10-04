@@ -7,10 +7,12 @@
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
+    "build:static": "node scripts/build-static-reader.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:reader": "node tests/reader.cjs"
+    "test:reader": "node tests/reader.cjs",
+    "test:static": "node tests/static-reader.cjs"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -58,6 +60,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "esbuild": "0.25.8",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
