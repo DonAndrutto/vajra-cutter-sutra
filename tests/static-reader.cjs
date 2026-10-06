@@ -70,6 +70,10 @@ async function main() {
     const { data: manifestData, errors: manifestErrors } = await session.send('Page.getAppManifest');
     assert.deepEqual(manifestErrors, []);
     const manifest = JSON.parse(manifestData);
+    assert.equal(manifest.display,'fullscreen');
+    assert.deepEqual(manifest.display_override,['fullscreen','standalone']);
+    assert.equal(await page.locator('meta[name="apple-mobile-web-app-capable"]').getAttribute('content'),'yes');
+    assert.equal(await page.locator('meta[name="mobile-web-app-capable"]').getAttribute('content'),'yes');
     for (const field of ['id', 'start_url', 'scope']) assert.equal(new URL(manifest[field], url + 'manifest.webmanifest').href, url);
     assert.equal(manifest.icons.length, 4);
     for (const icon of manifest.icons) {
@@ -159,8 +163,34 @@ async function main() {
     await iosPage.goto(url);
     await iosPage.getByRole('button', { name: 'Install app', exact: true }).click();
     await iosPage.getByRole('heading', { name: 'Add to Home Screen' }).waitFor();
+    assert.equal(await iosPage.getByText('Open as Web App',{exact:true}).count(),1);
     await iosPage.getByRole('button', { name: 'Close', exact: true }).last().click();
     await ios.close();
+    // The app must recognize both installed display modes and suppress the
+    // install prompt even if a stale prompt event is still available.
+    for (const mode of ['fullscreen','standalone','ios-standalone']) {
+      const installed = await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1'});
+      await installed.addInitScript(mode => {
+        const original = window.matchMedia.bind(window);
+        window.matchMedia = query => {
+          if (query === '(display-mode: '+mode+')') {
+            return {matches:true,media:query,onchange:null,addListener(){},removeListener(){},
+              addEventListener(){},removeEventListener(){},dispatchEvent(){return true;}};
+          }
+          return original(query);
+        };
+        if (mode === 'ios-standalone') Object.defineProperty(navigator,'standalone',{value:true});
+      },mode);
+      const installedPage = await installed.newPage();
+      await installedPage.goto(url);await installedPage.locator('#btnPage').waitFor();
+      await installedPage.evaluate(() => {
+        window.__vcsInstallPrompt = {prompt:async()=>{},userChoice:Promise.resolve({outcome:'dismissed'})};
+        window.dispatchEvent(new Event('vcs:installprompt'));
+      });
+      await installedPage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      assert.equal(await installedPage.getByRole('button',{name:'Install app',exact:true}).count(),0,mode+' suppresses install UI');
+      await installed.close();
+    }
     assert.deepEqual(nextRequests, []);
     assert.deepEqual(errors, []);
     console.log(`PASS: all 33 sections exactly match source in five variants; Pages and public entry points, file opening, manifest/install eligibility, original icons, ${fonts.files.length} cached fonts, hard offline refresh, both saved modes, and offline.html fallback.`);
