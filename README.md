@@ -20,6 +20,12 @@ together. This is a maintainer tool; Pages serves the checked-in files without r
 
 The page icon between **+** and **Fullscreen** switches between scrolling and page turning. Pages turn instantly, keep whole lines, and reflow in portrait or landscape while preserving the passage during text-size and fullscreen changes. Use the page arrows, left/right edge taps, arrow keys, Page Up/Down, or Space / Shift+Space. The mode is saved locally. The up arrow always returns to the beginning of the sutra.
 
+Page mode also uses Ewam's exact gesture mechanics: swipe left for the next
+page, right for the previous page, pinch inward to decrease the base text size
+by 1px, or spread to increase it by 1px, once per gesture. The visible passage
+is preserved on resizing. Gesture handlers are completely removed in scroll
+mode, leaving scrolling native and resizing available through the toolbar.
+
 The shared header and bottom controls use Ewam's visual style and exact reader icons. All bottom controls are expanded by default; fullscreen leaves only its expand/contract control, with edge taps and keyboard turns still available. Sanskrit, Tibetan, phonetic variants, English, the index, glossary filter, and offline installation remain available. Automatic and tilt scrolling are disabled in page mode.
 
 ## Installing the app
@@ -88,6 +94,7 @@ npm run start      # serve the production build
 npm run typecheck  # tsc --noEmit
 npm run build:static # regenerate the checked-in single-file reader and Pages copies
 npm run test:static  # serve and verify the static reader at the Pages subpath
+npm run test:gestures # verify page-only swipes/pinches and native scrolling
 ```
 
 For browser regression checks, run `npx playwright install chromium`, start the reader, then run `npm run test:reader`. The suite checks every section in all five text variants across portrait, landscape, narrow screens, and maximum text size, along with navigation, reflow, fullscreen, index, glossary, automatic scrolling, and saved mode. Screenshots go to `test-results/`.

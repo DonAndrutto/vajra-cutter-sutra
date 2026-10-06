@@ -63,7 +63,14 @@ async function main() {
     assert.equal(await page.locator('#btnPlay').isDisabled(),true);
 
     if (fs.existsSync(reference)) {
-      referenceServer = http.createServer((req,res) => {res.setHeader('Content-Type','text/html; charset=utf-8');res.end(fs.readFileSync(reference));});
+      referenceServer = http.createServer((req,res) => {
+        const pathname = decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+        const file = pathname === '/' ? reference : path.resolve(path.dirname(reference), '.' + pathname);
+        if (!file.startsWith(path.dirname(reference) + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {res.writeHead(404).end();return;}
+        res.setHeader('Content-Type', {'.html':'text/html; charset=utf-8','.js':'text/javascript',
+          '.css':'text/css','.woff2':'font/woff2','.jpg':'image/jpeg','.png':'image/png'}[path.extname(file)] || 'application/octet-stream');
+        res.end(fs.readFileSync(file));
+      });
       await new Promise(resolve => referenceServer.listen(0,'127.0.0.1',resolve));
       const ewam = await browser.newPage();
       await ewam.goto('http://127.0.0.1:' + referenceServer.address().port);
