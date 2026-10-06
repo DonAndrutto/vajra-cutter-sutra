@@ -39,7 +39,16 @@ no connection at all.
   Safari does not expose a programmatic install.
 - **Desktop** — the install control in the address bar works as well.
 
-Installed copies launch standalone (no browser chrome) and show the gold-on-black sutra icon.
+Installed copies open in their own app window without browser navigation controls and show the gold-on-black sutra icon.
+The manifest now requests **fullscreen**, with a **standalone** fallback for
+browsers that do not support that display mode. Both app modes hide browser
+navigation controls. The reader's own controls remain available.
+
+Install from [Vajrachhedika](https://vajrachhedika.arybszleger.com/) and open the
+installed app icon. On iPhone/iPad, use **Share → Add to Home Screen**, keep
+**Open as Web App** enabled if shown, then tap **Add**. iOS uses its standalone
+app mode and may retain the system status bar; the Safari address bar and
+toolbar are not part of the installed reader.
 
 ## Offline reading
 

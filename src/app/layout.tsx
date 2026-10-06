@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description: 'An application for reading and studying the Vajracchedika Sutra.',
   applicationName: 'Vajracchedikā',
   manifest: '/manifest.webmanifest',
+  other: { 'mobile-web-app-capable': 'yes' },
   appleWebApp: {
     capable: true,
     title: 'Vajracchedikā',

@@ -28,6 +28,7 @@ const html = `<!doctype html>
   <meta name="theme-color" content="#121214">
   <meta name="description" content="Read and recite the Vajracchedikā Prajñāpāramitā Sūtra in Sanskrit, Tibetan and English — available offline.">
   <meta name="application-name" content="Vajracchedikā">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Vajracchedikā">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">

@@ -27,6 +27,7 @@ declare global {
 
 function isStandalone() {
   return (
+    window.matchMedia("(display-mode: fullscreen)").matches ||
     window.matchMedia("(display-mode: standalone)").matches ||
     // iOS reports installed web apps through its own non-standard flag.
     (navigator as Navigator & { standalone?: boolean }).standalone === true
@@ -104,8 +105,8 @@ export default function InstallAppButton() {
           <DialogHeader>
             <DialogTitle className="font-sans">Add to Home Screen</DialogTitle>
             <DialogDescription>
-              Install the reader on this device to open it from your home screen and use it
-              without a connection.
+              Install the reader on this device to open it from your home screen without
+              the browser address bar or navigation controls, and read offline.
             </DialogDescription>
           </DialogHeader>
           <ol className="space-y-3 py-2 text-sm text-muted-foreground">
@@ -125,8 +126,15 @@ export default function InstallAppButton() {
             <li className="flex items-start gap-3">
               <span className="mt-0.5 w-4 shrink-0 text-center text-primary">3</span>
               <span>
+                Keep <strong className="text-foreground">Open as Web App</strong> turned on
+                if this option appears.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 w-4 shrink-0 text-center text-primary">4</span>
+              <span>
                 Tap <strong className="text-foreground">Add</strong>. The sutra icon appears
-                alongside your other apps.
+                alongside your other apps. Open the reader using that icon.
               </span>
             </li>
           </ol>
