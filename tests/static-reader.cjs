@@ -1,7 +1,6 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const http = require('node:http');
 const Module = require('node:module');
 const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
@@ -12,6 +11,7 @@ const root = path.resolve(__dirname, '..');
 const prefix = '/vajra-cutter-sutra/';
 const output = path.join(root, 'test-results');
 const variants = ['english', 'tibetan', 'tibetan-translit', 'sanskrit-devanagari', 'sanskrit-translit'];
+const workerVersion = fs.readFileSync(path.join(root,'public/sw.js'),'utf8').match(/const VERSION = '([^']+)'/)[1];
 const source = new Module(path.join(root, 'sutra-source.cjs'));
 source._compile(buildSync({ entryPoints: [path.join(root, 'src/data/sutra-data.ts')],
   bundle: true, platform: 'node', format: 'cjs', write: false }).outputFiles[0].text, source.id);
@@ -49,16 +49,7 @@ async function main() {
   for (const name of fs.readdirSync(path.join(root, 'public/icons'))) {
     assert.deepEqual(fs.readFileSync(path.join(root, 'icons', name)), fs.readFileSync(path.join(root, 'public/icons', name)));
   }
-  const server = http.createServer((req, res) => {
-    const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    if (!pathname.startsWith(prefix)) { res.writeHead(404).end(); return; }
-    let file = path.resolve(root, pathname.slice(prefix.length) || 'index.html');
-    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
-    if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) { res.writeHead(404).end(); return; }
-    res.setHeader('Content-Type', { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript',
-      '.webmanifest': 'application/manifest+json', '.png': 'image/png' }[path.extname(file)] || 'application/octet-stream');
-    res.end(fs.readFileSync(file));
-  });
+  const server = require('./serve-static.cjs').createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const url = `http://127.0.0.1:${server.address().port}${prefix}`;
   const browser = await chromium.launch(process.env.READER_BROWSER_PATH ? { executablePath: process.env.READER_BROWSER_PATH } : {});
@@ -106,15 +97,15 @@ async function main() {
     const stylesheetUrl = await page.locator('link[rel="stylesheet"]').getAttribute('href');
     const stylesheet = await page.request.get(stylesheetUrl, { headers: { 'User-Agent': await page.evaluate(() => navigator.userAgent) } });
     assert.ok(stylesheet.ok());
-    const fonts = await page.evaluate(async css => {
-      const cacheName = (await caches.keys()).find(name => name.includes('fonts-v3'));
+    const fonts = await page.evaluate(async ({css,version}) => {
+      const cacheName = (await caches.keys()).find(name => name.includes('fonts-' + version));
       const cache = await caches.open(cacheName);
       const urls = (await cache.keys()).map(request => request.url);
       // The stylesheet requested by <link> is opaque; check its key and use the
       // same-UA readable network copy to identify every precached font file.
       const files = [...css.matchAll(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/g)].map(match => match[1]);
       return { css, files, urls };
-    }, await stylesheet.text());
+    }, {css:await stylesheet.text(),version:workerVersion});
     assert.ok(fonts.urls.includes(stylesheetUrl));
     for (const family of ['EB Garamond', 'Inter', 'Jomolhari']) assert.ok(fonts.css.includes(family), `${family}: ${fonts.css.slice(0, 500)}`);
     assert.ok(fonts.files.length);
@@ -145,10 +136,10 @@ async function main() {
     await context.setOffline(false);
     // Remove only this shell to exercise the retained offline.html fallback.
     await page.goto(url);
-    await page.evaluate(async () => {
-      const cache = await caches.open((await caches.keys()).find(name => name.includes('shell-v3') && !name.includes('%2Fpublic%2F')));
+    await page.evaluate(async version => {
+      const cache = await caches.open((await caches.keys()).find(name => name.includes('shell-' + version) && !name.includes('%2Fpublic%2F')));
       for (const request of await cache.keys()) if (!request.url.endsWith('/offline.html')) await cache.delete(request);
-    });
+    }, workerVersion);
     await context.setOffline(true);
     await page.goto(url + 'uncached/nested-page');
     await page.getByRole('heading', { name: 'The reader is offline' }).waitFor();

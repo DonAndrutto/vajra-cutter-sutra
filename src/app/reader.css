@@ -483,7 +483,7 @@
 .index-item.is-current { background:var(--ewam-accent-10); color:var(--ewam-accent); font-weight:700; box-shadow:inset 3px 0 var(--ewam-accent); }
 html.paged-reading,.paged-reading body { height:100%; overflow:hidden; overflow-anchor:none; }
 .paged-reading *,.paged-reading *::before,.paged-reading *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
-.paged-reading .content-area { position:fixed; top:var(--page-top); left:0; right:0; height:var(--page-height); padding:0 16px; overflow:hidden; }
+.paged-reading .content-area { position:fixed; top:var(--page-top); left:0; right:0; height:var(--page-height); padding:0 16px; overflow:hidden; touch-action:none; }
 .paged-reading .section-block { display:none; margin:0; }
 .paged-reading .section-block.page-section { display:block; width:var(--page-width); height:100%; column-width:var(--page-width); column-gap:32px; column-fill:auto; }
 .paged-reading .sutra-title { line-height:1.65; }

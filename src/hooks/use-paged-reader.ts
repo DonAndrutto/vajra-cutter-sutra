@@ -2,6 +2,7 @@
 
 import { RefObject, useLayoutEffect, useRef } from 'react';
 import { ReaderNavigation, useAppContext } from '@/context/app-context';
+import { installReaderGestures } from '@/lib/reader-gestures';
 
 type Anchor = { section: number; block: string; offset: number; top: number };
 
@@ -23,7 +24,7 @@ function textRange(element: Element, offset: number) {
 // Native columns keep complete line boxes, including paragraphs longer than a page.
 // Anchors identify a character within a paragraph so reflow keeps that passage visible.
 export function usePagedReader(areaRef: RefObject<HTMLDivElement>, activeLanguage: string) {
-  const {readingMode, textSize, isUiVisible, readerNavigation, setReaderPosition,
+  const {readingMode, textSize, setTextSize, isUiVisible, readerNavigation, setReaderPosition,
     view, isDonationModalOpen} = useAppContext();
   const anchorRef = useRef<Anchor | null>(null);
   const position = useRef({section:0, page:0, count:1, stride:0});
@@ -221,4 +222,23 @@ export function usePagedReader(areaRef: RefObject<HTMLDivElement>, activeLanguag
     lastCommand.current = readerNavigation.id;
     command.current(readerNavigation);
   }, [readerNavigation]);
+
+  // Keep the gesture session alive across font reflow. Recreating it during
+  // a pinch would lose the guard against a final finger producing an edge tap.
+  useLayoutEffect(() => {
+    const area = areaRef.current;
+    if (!area || readingMode !== 'pages') return;
+    const gestures = installReaderGestures(area, {
+      isPageMode: () => document.documentElement.classList.contains('paged-reading'),
+      isBlocked: target => overlayOpen.current || !(target instanceof Element) ||
+        !!target.closest('input,textarea,select,[contenteditable="true"],a,button,[role="dialog"]'),
+      turnPage: direction => command.current({id:0, kind:'turn', value:direction}),
+      resizeText: direction => {
+        // Ewam's one-unit base size change is 1px; this reader stores rem.
+        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        setTextSize(size => Math.max(.5, Math.min(2.5, size + direction / rem)));
+      }
+    });
+    return gestures.dispose;
+  }, [areaRef, readingMode, setTextSize]);
 }

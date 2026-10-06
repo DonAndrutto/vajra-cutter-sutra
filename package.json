@@ -12,7 +12,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test:reader": "node tests/reader.cjs",
-    "test:static": "node tests/static-reader.cjs"
+    "test:static": "node tests/static-reader.cjs",
+    "test:gestures": "node tests/gestures.cjs"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
