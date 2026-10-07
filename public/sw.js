@@ -10,7 +10,7 @@
  * a bump discards the previous generation on activate.
  */
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 // Scope both URLs and cache names: Pages and /public/ must not erase each other.
 const BASE = self.registration.scope;
 const BASE_PATH = new URL(BASE).pathname;

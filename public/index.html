@@ -3,6 +3,12 @@
      All application code, styles, sutra variants, and glossary are inline. -->
 <html lang="en">
 <head>
+  <script>
+    // Fallback only; GitHub Pages already enforces HTTPS on the custom domain.
+    if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      location.replace(location.href.replace(/^http:/, 'https:'));
+    }
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#121214">
@@ -13,6 +19,7 @@
   <meta name="apple-mobile-web-app-title" content="Vajracchedikā">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Vajra-Cutter Sutra Reader</title>
+  <link rel="canonical" href="https://vajrachhedika.arybszleger.com/">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="apple-icon.png">

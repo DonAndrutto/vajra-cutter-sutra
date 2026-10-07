@@ -18,11 +18,18 @@ const globals = await readFile('src/app/globals.css', 'utf8');
 const css = await postcss([tailwindcss('./tailwind.config.ts')]).process(globals, { from: 'src/app/globals.css' });
 const readerCss = await readFile('src/app/reader.css', 'utf8');
 const fonts = 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Jomolhari&display=swap';
+const canonicalUrl = 'https://vajrachhedika.arybszleger.com/';
 const html = `<!doctype html>
 <!-- Generated from the current reader by scripts/build-static-reader.mjs.
      All application code, styles, sutra variants, and glossary are inline. -->
 <html lang="en">
 <head>
+  <script>
+    // Fallback only; GitHub Pages already enforces HTTPS on the custom domain.
+    if (location.protocol === 'http:' && !/^(localhost|127\\.0\\.0\\.1|\\[::1\\])$/.test(location.hostname)) {
+      location.replace(location.href.replace(/^http:/, 'https:'));
+    }
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#121214">
@@ -33,6 +40,7 @@ const html = `<!doctype html>
   <meta name="apple-mobile-web-app-title" content="Vajracchedikā">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Vajra-Cutter Sutra Reader</title>
+  <link rel="canonical" href="${canonicalUrl}">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="apple-icon.png">
