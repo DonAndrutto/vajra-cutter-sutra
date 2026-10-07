@@ -1,18 +1,24 @@
 # Vajra-Cutter Sutra Reader
 
 A single-file reader for the Vajracchedikā Prajñāpāramitā Sūtra in Sanskrit, Tibetan and English,
-published at https://donandrutto.github.io/vajra-cutter-sutra/.
+published at https://vajrachhedika.arybszleger.com/. The GitHub Pages default address,
+https://donandrutto.github.io/vajra-cutter-sutra/, redirects there via the repository's `CNAME`
+and GitHub's own HTTPS enforcement.
 
-`public/index.html` contains the entire reader: the existing UI, styles, all five text variants,
-index, glossary, themes, text size, scrolling, pagination, fullscreen, and install control. Open it
-directly to read. No Next.js build, Node.js, server, or external JavaScript is needed to run it.
-The original Next.js source stays in the repository so both readers use the same components.
+Root `index.html` is the source of truth and contains the entire reader: the existing UI, styles,
+all five text variants, index, glossary, themes, text size, scrolling, pagination, fullscreen, and
+install control. `public/index.html` is a byte-identical build copy, kept so the file can still be
+opened directly (and so the Next.js `public/` folder keeps serving the same icons, manifest,
+offline page, and worker it always has). No Next.js build, Node.js, server, or external JavaScript
+is needed to run either copy. The original Next.js source stays in the repository so both readers
+use the same components.
 
 ## GitHub Pages
 
 The publishing source is **Deploy from a branch → main → /(root)**. The empty root `.nojekyll`
-disables Jekyll. Pages serves root `index.html`, an identical copy of `public/index.html`, with
-byte-for-byte copies of the existing icon artwork, manifest, offline page, and worker beside it.
+disables Jekyll. Pages serves root `index.html`, with byte-for-byte copies of the existing icon
+artwork, manifest, offline page, and worker beside it. `public/index.html` and its own copies of
+those files stay in sync with the root ones, both written by the same build step.
 All asset and install paths are relative, so `/vajra-cutter-sutra/` and `/public/index.html` work.
 
 When changing the reader source, run `npm run build:static` and commit the regenerated files
